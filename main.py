@@ -24,30 +24,26 @@ treb_nav_vrem_id = 2
 treb_skritn_id = 3
 # Необходимость наведения в зад. полусферу: 0/1
 treb_nav_zadn_id = 4
-# Необходимость наведения в пер. полусферу: 0/1
-treb_nav_per_id = 5
 # Предпочтительно наведение в зад. полусферу: 0/1
-predp_nav_zadn_id = 6
-# Предпочтительно наведение в пер. полусферу: 0/1
-predp_nav_per_id = 7
+predp_nav_zadn_id = 5
 # Реализация по скорости ?Прямого метода?: 0/1
-real_v_pr_id = 8
+real_v_pr_id = 6
 # Реализация по скорости ?Метода манёвра?: 0/1
-real_v_man_id = 9
+real_v_man_id = 7
 # Реализация по скорости ?Метода перехвата?: 0/1
-real_v_per_id = 10
+real_v_per_id = 8
 # Реализация траектории ?Прямого метода?: 0/1
-real_tr_pr_id = 11
+real_tr_pr_id = 9
 # Реализация траектории ?Метода манёвра?: 0/1
-real_tr_man_id = 12
+real_tr_man_id = 10
 # Реализация траектории ?Метода перехвата?: 0/1
-real_tr_per_id = 13
+real_tr_per_id = 11
 # Реализация по запасу топлива ?Прямого метода?: 0/1
-real_top_pr_id = 14
+real_top_pr_id = 12
 # Реализация по запасу топлива ?Метода манёвра?: 0/1
-real_top_man_id = 15
+real_top_man_id = 13
 # Реализация по запасу топлива ?Метода перехвата?: 0/1
-real_top_per_id = 16
+real_top_per_id = 14
 
 # class syntax
 
@@ -112,16 +108,6 @@ if __name__ == '__main__':
             print("Неопознанное требование наведения в зад. полусферу\n")
             exit(0)
 
-        # Необходимость наведения в пер. полусферу: 0/1
-        treb_nav_per = False
-        if row[treb_nav_per_id] == "1":
-            treb_nav_per = True
-        elif row[treb_nav_per_id] == "0":
-            treb_nav_per = False
-        else:
-            print("Неопознанное требование наведения в пер. полусферу\n")
-            exit(0)
-
         # Предпочтительно наведение в зад. полусферу: 0/1
         predp_nav_zadn = False
         if row[predp_nav_zadn_id] == "1":
@@ -132,15 +118,6 @@ if __name__ == '__main__':
             print("Неопознанное предпочтитение наведения в задн. полусферу\n")
             exit(0)
 
-        # Предпочтительно наведение в пер. полусферу: 0/1
-        predp_nav_per = False
-        if row[predp_nav_per_id] == "1":
-            predp_nav_per = True
-        elif row[predp_nav_per_id] == "0":
-            predp_nav_per = False
-        else:
-            print("Неопознанное предпочтитение наведения в пер. полусферу\n")
-            exit(0)
         # Реализация по скорости ?Прямого метода?: 0/1
         real_v_pr = False
         if row[real_v_pr_id] == "1":
@@ -240,29 +217,19 @@ if __name__ == '__main__':
         if (naved == NAV.RAD) and treb_skritn:
             print("Невозможно выбрать метод наведения из за рад. наведения и треб. к скрытности")
             exit(0)
-        if (naved == NAV.TEPL) and (predp_nav_per or treb_nav_per):
-            print("Невозможно выбрать метод наведения из за тепл. наведения и навед в пер полупл")
-            exit(0)
-        if (treb_nav_per and treb_nav_zadn) or (treb_nav_per and predp_nav_zadn) or (
-                predp_nav_per and treb_nav_zadn) or (predp_nav_per and predp_nav_zadn):
-            print("Невозможно выбрать метод наведения из-за конфликтов полусфер наведения")
-            exit(0)
-        if polusph == POLUSPHERE.PEREDN:
-            vozm_man = False
-            vozm_pr = False
-        if (naved == NAV.TEPL) or treb_skritn:
+        if ((naved == NAV.TEPL) or treb_skritn) and (polusph == POLUSPHERE.PEREDN):
             vozm_per = False
+
         if (not real_top_per) and (not real_v_per) and (not real_tr_per):
             vozm_per = False
         if (not real_top_pr) and (not real_v_pr) and (not real_tr_pr):
             vozm_pr = False
         if (not real_top_man) and (not real_v_man) and (not real_tr_man):
             vozm_man = False
-        if predp_nav_zadn and (vozm_man or vozm_pr):
+        if predp_nav_zadn and (vozm_man or vozm_pr) and (polusph == POLUSPHERE.PEREDN):
             vozm_per = False
-        if predp_nav_per and vozm_per:
-            vozm_pr = False
-            vozm_man = False
+        if treb_nav_zadn and (polusph == POLUSPHERE.PEREDN):
+            vozm_per = False
         if not (vozm_man or vozm_pr or vozm_per):
             print("Невозможно выбрать метод наведения")
             exit(0)

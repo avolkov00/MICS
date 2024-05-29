@@ -39,6 +39,13 @@ class TrajectoryGenerator:
                                      np.hsplit(at, np.shape(at)[1])))}
         self._aircraftTrajectory = at
 
+        print("App Launch:", at[0][0], at[1][0])
+        self.a_launch = list()
+        self.a_launch.append( at[0][0])
+        self.a_launch.append( at[1][0])
+        self.a_vel = 2
+        self.a_angle = np.arctan2( at[1][0] - at[1][1], at[0][1] - at[0][0]) / np.pi * 180
+
         # Задание параметров ракет
         settings = self._request['Missiles']
         usual = missile.Missile()
@@ -46,6 +53,15 @@ class TrajectoryGenerator:
         usual.launchPoint = requestPointToNPPoint(settings['LaunchPoint'])
         direction = requestPointToNPPoint(settings['Direction']) - usual.launchPoint
         usual.startVelocity = unitVector(direction) * settings['VelocityModule']
+        print("Per Launch:", usual.launchPoint)
+        self.p_launch = usual.launchPoint
+        print("Per Vel:", usual.startVelocity)
+        self.p_vel = usual.startVelocity + 0.5
+        print("Per Angle:", np.arctan2(direction[1], direction[0]) / np.pi * (-180))
+        self.p_angle = np.arctan2(direction[1], direction[0]) / np.pi * (-180)
+
+
+
         usual.controller = controllers.Proportional(settings['PropCoeff'])
 
         fuzzy = usual.copy()
@@ -55,6 +71,7 @@ class TrajectoryGenerator:
         ut = usual.trajectory(self._aircraftTrajectory)
         ut = list(map(npPointToResponsePoint, np.hsplit(ut, np.shape(ut)[1])))
         self._response['UsualMissile'] = {'Trajectory': ut, 'IsHit': usual.hasHit}
+        print("\n\n\n\n")
         # Генерация траектории ракеты с нечеткой модификацией пропорционального метода наведения
         ft = fuzzy.trajectory(self._aircraftTrajectory)
         ft = list(map(npPointToResponsePoint, np.hsplit(ft, np.shape(ft)[1])))
@@ -85,9 +102,9 @@ def npPointToResponsePoint(p):
 def npPointsToCurves(curvesBasisPoints, maxPerCurvePointsCount):
     if curvesBasisPoints.size == 0:
         return []
-    print(curvesBasisPoints)
+    # print(curvesBasisPoints)
     result = [Curve.from_nodes(curvesBasisPoints[:, :maxPerCurvePointsCount])]
     result.extend(npPointsToCurves(curvesBasisPoints[:, maxPerCurvePointsCount - 1:],
                                    maxPerCurvePointsCount))
-    print(result)
+    # print(result)
     return result

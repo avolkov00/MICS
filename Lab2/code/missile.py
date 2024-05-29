@@ -51,7 +51,8 @@ class Missile:
 
         rotationAngle = self.controller.rotationAngle(self)
         self._velocity = rotate(self._velocity, rotationAngle)
-
+        print(round(self._sightAngleDelta, 3), ";", round(self._approachVelocity,3), ";", round(rotationAngle,3),
+              ";", round(rotationAngle / (self._sightAngleDelta * self._approachVelocity), 3), ";")
         nextPoint = np.reshape(self._points[:, -1], (2, 1)) + self._velocity
         self._points = np.hstack((self._points, nextPoint))
 
